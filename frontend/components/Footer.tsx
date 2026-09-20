@@ -1,0 +1,229 @@
+"use client";
+
+import Link from "next/link";
+import { Mark } from "./Mark";
+import { routes } from "@/lib/routes";
+import { useCourses } from "@/lib/api/courses";
+
+const productLinks = [
+  { href: `${routes.home}#solver`, label: "The solver" },
+  { href: `${routes.home}#bags`, label: "Five bags" },
+  { href: routes.dashboard, label: "Dashboard" },
+  { href: routes.pricing, label: "Pricing" },
+  { href: routes.raceMode, label: "Race Mode" },
+];
+
+/**
+ * The Courses column, read from the directory rather than written down.
+ *
+ * It used to be three hardcoded names — "Tramuntana Full", "North Shore Full",
+ * "Kalmar 70.3" — every one of them pointing at `/course-recon` with no course
+ * on it, so all three went to the same page regardless of which you clicked.
+ * Two of the three were demo courses the catalogue has since retired, and the
+ * third is the showcase, which a signed-in athlete is not supposed to see at
+ * all. A footer on every page of the site, naming races that are not there.
+ *
+ * Reading the real directory fixes all of it at once, and cannot go stale: the
+ * viewer's own visibility rules already decide what comes back, so a signed-in
+ * athlete gets their season and a visitor gets the showcase.
+ */
+function useCourseLinks(): { href: string; label: string }[] {
+  const { data } = useCourses();
+  const links = (data?.data ?? [])
+    .filter((course) => course.availability === "available")
+    .slice(0, 3)
+    .map((course) => ({
+      href: `${routes.courseRecon}?course=${encodeURIComponent(course.slug)}`,
+      label: course.name,
+    }));
+  return [...links, { href: routes.races, label: "Race directory" }];
+}
+
+/*
+ * Only destinations that exist.
+ *
+ * "Race reports" pointed at `#` — a link on every page of the site to a page
+ * that has never been built. A dead link in a footer is a small thing that
+ * tells a visitor a large one: that nobody has walked the site recently.
+ */
+const athleteLinks = [
+  // Labelled for what is behind it. It used to say "First iron distance",
+  // which named an article that did not exist.
+  { href: routes.guide, label: "Help and guides" },
+  { href: routes.coach, label: "Coaches" },
+  { href: routes.howItWorks, label: "Method" },
+];
+
+const socials = [
+  {
+    href: "https://x.com/theroyprojecthq",
+    label: "X",
+    path: "M18.9 2H22l-6.8 7.7L23 22h-6.4l-5-6.6L5.8 22H2.7l7.2-8.2L1.6 2H8l4.7 6.2L18.9 2zm-1.1 18h1.8L6.4 3.8H4.5L17.8 20z",
+  },
+  {
+    href: "https://www.instagram.com/roy_subhradiproy/",
+    label: "Instagram",
+    path: "M12 7.1a5 5 0 110 10 5 5 0 010-10zm0 1.8a3.2 3.2 0 100 6.4 3.2 3.2 0 000-6.4zm5.2-2a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4zM12 2.2c3.2 0 3.6 0 4.9.07 1.2.05 1.8.25 2.2.42.6.23 1 .5 1.5.95.4.45.7.9.9 1.5.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c0 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.5-.5.4-.9.7-1.5.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2 0-1.8-.2-2.2-.4-.6-.2-1-.5-1.5-.9-.4-.5-.7-.9-.9-1.5-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c0-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.5.5-.45.9-.72 1.5-.95.4-.17 1-.37 2.2-.42C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.1 0-3.5 0-4.7.07-1 .05-1.5.2-1.9.35-.4.15-.7.33-1 .63-.3.3-.5.6-.6 1-.2.4-.3.9-.4 1.9-.07 1.2-.07 1.5-.07 4s0 2.8.07 4c.1 1 .2 1.5.4 1.9.1.4.3.7.6 1 .3.3.6.5 1 .6.4.2.9.3 1.9.4 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1-.1 1.5-.2 1.9-.4.4-.1.7-.3 1-.6.3-.3.5-.6.6-1 .2-.4.3-.9.4-1.9.1-1.2.1-1.5.1-4s0-2.8-.1-4c-.1-1-.2-1.5-.4-1.9-.1-.4-.3-.7-.6-1-.3-.3-.6-.48-1-.63-.4-.15-.9-.3-1.9-.35C15.5 4 15.1 4 12 4z",
+  },
+  {
+    href: "https://www.linkedin.com/in/subhradip-roy/",
+    label: "LinkedIn",
+    path: "M4.98 3.5a2.5 2.5 0 11-.02 5 2.5 2.5 0 01.02-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05C21.3 8.65 22 11 22 14.1V21h-4v-6.1c0-1.5-.5-2.5-1.8-2.5-1.05 0-1.7.7-1.95 1.4-.1.25-.12.6-.12.95V21h-4V9z",
+  },
+];
+
+function FooterCol({ title, links }: { title: string; links: { href: string; label: string }[] }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ fontSize: 14, color: "#A39B8A", fontWeight: 500 }}>{title}</div>
+      {links.map((l) => (
+        <Link key={l.label} href={l.href} style={{ fontSize: 15.5, fontWeight: 500 }}>
+          {l.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * How far the ink field stands before the card begins.
+ *
+ * Every page arrives at this footer differently: the marketing pages come out
+ * of a full-bleed photograph, the app pages out of cream with 88–104px of air.
+ * This band is what both of them land on. A photograph above fades into it and
+ * the seam disappears entirely; cream above meets it as a clean edge between
+ * two flat fields, which reads as a decision rather than an accident. It is
+ * also simply room — the card used to start 20px after the page ended.
+ */
+const RISER = 108;
+
+type FooterProps = {
+  /** Extra copyright-line suffix, e.g. " · COURSE BUNDLE v2026.2". */
+  extra?: string;
+};
+
+/** Shared footer — ink field, inset cream panel, five columns, solo-founder credit. */
+export function Footer({ extra = "" }: FooterProps) {
+  const courseLinks = useCourseLinks();
+  return (
+    <footer style={{ position: "relative", background: "#15140F", padding: "0 20px 20px", overflow: "hidden" }}>
+      {/* Grain first, then the lift — see .ink-grain. The grain is opaque and
+          IS the field, so anything tinting the field has to sit on top of it. */}
+      <div aria-hidden className="ink-grain" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+
+      {/* The field.
+
+          This was a photograph — `assets/footer/backdrop.webp`, 643 KB of
+          coastline shipped with every page, of which the inset card covered
+          everything but a 20px border. It was not a background, it was a
+          picture frame. And on the two pages whose last section is itself a
+          full-bleed photograph it set one image directly on top of another
+          with a hard line between them, which is what made the bottom of the
+          page look stacked rather than finished.
+
+          Ink instead — but not flat ink. A warm lift where the page comes down
+          into the field and a cool one under the card give it depth without
+          giving it a subject, which is the whole point: the footer is the
+          quiet end of the page and anything with a subject competes with the
+          section above it. */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            /* Zero at the top edge, on purpose and precisely. The seam has to
+               be the same #15140F the section above fades down to — a lift
+               that peaks at the join would draw the very line this is meant to
+               remove. The warmth comes in below it, once the eye has already
+               crossed. */
+            "linear-gradient(to bottom, rgba(228,98,47,0) 0px, rgba(228,98,47,.055) 190px, rgba(228,98,47,0) 380px)," +
+            "radial-gradient(86% 54% at 50% 100%, rgba(241,238,232,.045) 0%, rgba(241,238,232,0) 74%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* The riser — see RISER. */}
+      <div aria-hidden style={{ height: RISER }} />
+
+      <div style={{ position: "relative", background: "#FBF8F2", borderRadius: 9, padding: "56px 52px 40px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr)) 200px", gap: 40 }}>
+          <FooterCol title="Product" links={productLinks} />
+          <FooterCol title="Courses" links={courseLinks} />
+          <FooterCol title="Athletes" links={athleteLinks} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {/* About, Changelog and Status all pointed at `#`. They come back
+                when the pages behind them do. */}
+            <div style={{ fontSize: 14, color: "#A39B8A", fontWeight: 500 }}>Company</div>
+            <Link href={routes.howItWorks} style={{ fontSize: 15.5, fontWeight: 500 }}>How it works</Link>
+            <Link href={routes.pricing} style={{ fontSize: 15.5, fontWeight: 500 }}>Pricing</Link>
+            <div style={{ fontSize: 14, color: "#A39B8A", fontWeight: 500, marginTop: 12 }}>Talk to a human</div>
+            <Link href="mailto:hello@raceos.cc" style={{ fontSize: 15.5, fontWeight: 500 }}>hello@raceos.cc</Link>
+          </div>
+          <div>
+            <div style={{ fontSize: 14, color: "#A39B8A", fontWeight: 500, marginBottom: 16 }}>Follow</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {socials.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={s.label}
+                  className="social-icon"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 6,
+                    background: "#F1EDE4",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#15140F",
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d={s.path} />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 48, marginTop: 80 }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <Mark width={60} height={40} />
+              <span style={{ fontSize: 64, fontWeight: 600, letterSpacing: "-.055em", lineHeight: 0.9 }}>RaceOS</span>
+            </div>
+            <div className="mono" style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 20, fontSize: 11, letterSpacing: ".11em", color: "#8C8578" }}>
+              <span>BY</span>
+              <a
+                href="https://theroyproject.com"
+                target="_blank"
+                rel="noreferrer"
+                className="link-accent"
+                style={{ color: "#15140F", borderBottom: "1px solid rgba(228,98,47,.45)", paddingBottom: 1 }}
+              >
+                THEROYPROJECT.COM
+              </a>
+              <span>↗</span>
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div className="mono" style={{ fontSize: 11, letterSpacing: ".12em", color: "#A39B8A" }}>RACEOS © 2026{extra}</div>
+            <div style={{ display: "flex", gap: 18, marginTop: 12, fontSize: 14, fontWeight: 500 }}>
+              {/* Terms and Privacy are real obligations with no pages yet, so
+                  they are not linked to nothing — the address below is the one
+                  route to a human that actually works. */}
+              <Link href={routes.howItWorks}>Method</Link>
+              <Link href={routes.races}>Races</Link>
+              <a href="mailto:hello@raceos.cc">Contact</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

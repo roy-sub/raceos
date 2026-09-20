@@ -1,0 +1,80 @@
+# IRONMAN 70.3 Versailles -- the Yvelines, west of Paris.
+#
+# The only inland course in the catalogue, and the only one whose swim is in a
+# canal. It is swum where the real race swims it: the Grand Canal of the
+# chateau, the cross-shaped ornamental basin Le Notre cut in 1668, 1.6 km
+# west of the palace.
+#
+# Two things had to be true before this course could be built, and both are
+# recorded here because neither is obvious from the spec alone.
+#
+# 1. The Grand Canal is in the map data as `subtype: reservoir`, not `canal`.
+#    Overture classifies water by what it is rather than by its name, and an
+#    ornamental basin has no current. `water_kind: canal` used to accept only
+#    (canal, river, water), so the one course whose swim is famously in a
+#    canal could not find its canal. `s03_swim._SUBTYPE_PREFERENCE` now
+#    accepts reservoir for a canal.
+#
+# 2. A 70.3 swim is 1.9 km, and at the global 3:1 rectangle that is 710 m by
+#    240 m. The canal's arms are about 60 m across. Swept against the real
+#    polygon, the widest shape it holds is 40:1 -- 927 m by 23 m -- which is
+#    the long out-and-back such a race is actually swum as, one leg down each
+#    side of the arm. `swim.rectangle_aspect` overrides the global default for
+#    this course alone; every sea course is untouched and no existing bundle
+#    moves.
+course_id: versailles-703
+slug: versailles-703
+name: IRONMAN 70.3 Versailles
+place: Versailles, France
+country: FR
+timezone: Europe/Paris
+distance_type: "70.3"
+difficulty: MODERATE
+character: rural_rolling
+tone_color: "#4a4364"
+
+# On the Grand Canal, near the head of the western arm.
+start:
+  lat: 48.81001
+  lng: 2.10079
+
+swim:
+  water_kind: canal
+  water_name: Grand Canal de Versailles
+  # West-north-west, straight down the long arm. The canal's principal axis
+  # measures 111.2 deg; this is its reciprocal.
+  bearing_deg: 291.2
+  # See note 2 above. 1900 m at 40:1 is 927 m by 23 m.
+  rectangle_aspect: 40.0
+
+bike:
+  laps: 2
+  # North-west, out over the Yvelines plateau.
+  bearing_offset_deg: 300
+  character: rural_rolling
+
+run:
+  # Two laps, not three. The chateau park has few through-roads, so the
+  # tightest ring the graph can close is 8.9 km -- longer than the 7.0 km a
+  # three-lap half marathon asks for.
+  laps: 2
+  # East, back toward the palace and the town.
+  bearing_offset_deg: 90
+  character: rural_rolling
+
+season_year: 2026
+version: v2026.1
+provenance: ESTIMATED
+verified: false
+cutoff_generosity: 1.02
+
+changelog: >-
+  Initial generated bundle for the 2026 edition. Grand Canal swim, two-lap
+  Yvelines plateau bike leg, three-lap run back toward the town.
+notes: >-
+  Real venue, real roads, real terrain. The swim lies inside the chateau's own
+  Grand Canal polygon; the bike and run are routed rather than copied from the
+  organiser's course file, so the bundle stays ESTIMATED until one is
+  licensed.
+
+status: ready

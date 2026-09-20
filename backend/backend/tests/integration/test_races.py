@@ -1,0 +1,450 @@
+"""Races, and the demo path they unblock.
+
+Without a way to create a race there is no `race_id`, so the plan builder
+cannot start and nothing downstream — solve, race card, exports — can run.
+This file walks that whole path as a new signup would.
+"""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from uuid import UUID
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import select
+
+from raceos.db.models import Course, CourseBundle, Race
+from raceos.domain.enums import CourseAvailability
+from raceos.ingest.bundle_loader import load_bundle_file
+from tests.integration.conftest import buy_plan
+
+pytestmark = pytest.mark.integration
+
+BUNDLE_DIR = Path(__file__).resolve().parents[3] / "pipelines" / "course-ingest" / "out" / "bundles"
+TRAMUNTANA = BUNDLE_DIR / "tramuntana-full.bundle.json"
+needs_bundle = pytest.mark.skipif(
+    not TRAMUNTANA.is_file(), reason="generated bundles are git-ignored build artefacts"
+)
+
+ATHLETE_M = {
+    "swim_threshold_pace": 105,
+    "bike_threshold_power": 224,
+    "run_threshold_pace": 282,
+    "weight": 75,
+    "sweat_rate": 1.1,
+    "sodium_loss": 900,
+    "gut_carb_ceiling": 75,
+    "caffeine_tolerance": 300,
+}
+
+
+@pytest.fixture
+def seeded(api: TestClient, signed_up, migrated_engine, paywall):
+    from sqlalchemy.orm import sessionmaker
+
+    if not TRAMUNTANA.is_file():
+        pytest.skip("generated bundles are git-ignored build artefacts")
+    with sessionmaker(bind=migrated_engine)() as session:
+        load_bundle_file(session, TRAMUNTANA)
+        # The loader installs course data; it does not decide whether the row
+        # is bookable — `availability` is stored, not inferred from "has a
+        # bundle", so that a bundle under review cannot promote itself. The
+        # real seed applies that from the catalogue manifest; here we do the
+        # one line of it these tests depend on.
+        session.scalar(
+            select(Course).where(Course.slug == "tramuntana-full")
+        ).availability = CourseAvailability.AVAILABLE
+        session.commit()
+    return signed_up["headers"]
+
+
+def _future(days: int = 40) -> str:
+    return (datetime.now(UTC).date() + timedelta(days=days)).isoformat()
+
+
+# ---------------------------------------------------------------------------
+# The gap this closes
+# ---------------------------------------------------------------------------
+
+
+@needs_bundle
+def test_a_new_signup_can_enter_a_race_by_slug(seeded, api: TestClient) -> None:
+    """The directory hands out slugs, so a slug must be enough."""
+    response = api.post(
+        "/api/v1/races",
+        headers=seeded,
+        json={
+            "course_ref": "tramuntana-full",
+            "event_date": _future(),
+            "start_time_local": "07:00",
+            "bib": "1421",
+        },
+    )
+    assert response.status_code == 201, response.text
+    body = response.json()
+
+    assert body["course_name"] == "Tramuntana Full"
+    assert body["course_slug"] == "tramuntana-full"
+    assert body["bundle_version"], "the race is pinned to a bundle"
+    assert body["days_away"] == 40
+    assert body["timezone"]
+    assert body["plan_id"] is None, "no plan yet"
+
+
+@needs_bundle
+def test_the_whole_demo_path_runs_from_a_fresh_signup(seeded, api: TestClient) -> None:
+    """Signup → race → plan → pay → solve → race card → exports.
+
+    This is the path a client will be walked through. Before races existed it
+    could not start at all.
+    """
+    headers = seeded
+    for key, value in ATHLETE_M.items():
+        api.put(f"/api/v1/constraints/{key}", headers=headers, json={"value": value})
+
+    race = api.post(
+        "/api/v1/races",
+        headers=headers,
+        json={
+            "course_ref": "tramuntana-full",
+            "event_date": _future(30),
+            "start_time_local": "06:40",
+        },
+    ).json()
+
+    draft = api.post("/api/v1/plans", headers=headers, json={"race_id": race["id"]})
+    assert draft.status_code == 201, draft.text
+
+    buy_plan(api, headers, draft.json()["id"])
+    solved = api.post(f"/api/v1/plans/{draft.json()['id']}/solve", headers=headers, json={})
+    assert solved.status_code == 200, solved.text
+    plan = solved.json()
+
+    # The race card can now print its own heading without a second call.
+    assert plan["event_date"] == _future(30)
+    assert plan["start_time_local"] == "06:40"
+    assert plan["course_name"] == "Tramuntana Full"
+    assert plan["attribution"], "ODbL attribution travels with the plan"
+    assert plan["splits"]
+    assert plan["gates"]
+    assert plan["bags"]
+
+    exports = api.get(f"/api/v1/plans/{plan['id']}/export", headers=headers)
+    assert exports.status_code == 200
+    assert len(exports.json()["exports"]) == 5
+
+
+@needs_bundle
+def test_the_race_list_links_straight_to_an_existing_plan(seeded, api: TestClient) -> None:
+    """So the UI offers "open" rather than "start" for a race already planned."""
+    headers = seeded
+    race = api.post(
+        "/api/v1/races",
+        headers=headers,
+        json={
+            "course_ref": "tramuntana-full",
+            "event_date": _future(),
+            "start_time_local": "07:00",
+        },
+    ).json()
+    draft = api.post("/api/v1/plans", headers=headers, json={"race_id": race["id"]})
+
+    listed = api.get("/api/v1/races", headers=headers).json()
+    assert len(listed) == 1
+    assert listed[0]["plan_id"] == draft.json()["id"]
+    assert listed[0]["plan_status"] == "draft"
+
+
+@needs_bundle
+def test_entering_the_same_race_twice_returns_the_first(seeded, api: TestClient) -> None:
+    """A double-submit must not leave a duplicate to clean up."""
+    payload = {
+        "course_ref": "tramuntana-full",
+        "event_date": _future(),
+        "start_time_local": "07:00",
+    }
+    first = api.post("/api/v1/races", headers=seeded, json=payload).json()
+    second = api.post("/api/v1/races", headers=seeded, json=payload).json()
+    assert first["id"] == second["id"]
+    assert len(api.get("/api/v1/races", headers=seeded).json()) == 1
+
+
+@needs_bundle
+def test_a_typo_in_the_year_is_caught(seeded, api: TestClient) -> None:
+    response = api.post(
+        "/api/v1/races",
+        headers=seeded,
+        json={
+            "course_ref": "tramuntana-full",
+            "event_date": "2099-06-21",
+            "start_time_local": "07:00",
+        },
+    )
+    assert response.status_code == 422
+    assert "check the year" in response.json()["error"]["message"]
+
+
+@needs_bundle
+def test_an_unknown_course_is_a_404(seeded, api: TestClient) -> None:
+    response = api.post(
+        "/api/v1/races",
+        headers=seeded,
+        json={"course_ref": "no-such-course", "event_date": _future(), "start_time_local": "07:00"},
+    )
+    assert response.status_code == 404
+
+
+@needs_bundle
+def test_a_race_with_a_solved_plan_cannot_be_deleted(seeded, api: TestClient) -> None:
+    """The race is the only record of which event a solved plan was for."""
+    headers = seeded
+    for key, value in ATHLETE_M.items():
+        api.put(f"/api/v1/constraints/{key}", headers=headers, json={"value": value})
+    race = api.post(
+        "/api/v1/races",
+        headers=headers,
+        json={
+            "course_ref": "tramuntana-full",
+            "event_date": _future(),
+            "start_time_local": "07:00",
+        },
+    ).json()
+    draft = api.post("/api/v1/plans", headers=headers, json={"race_id": race["id"]})
+    buy_plan(api, headers, draft.json()["id"])
+    api.post(f"/api/v1/plans/{draft.json()['id']}/solve", headers=headers, json={})
+
+    assert api.delete(f"/api/v1/races/{race['id']}", headers=headers).status_code == 409
+
+
+@needs_bundle
+def test_an_unplanned_race_can_be_removed(seeded, api: TestClient, api_db) -> None:
+    race = api.post(
+        "/api/v1/races",
+        headers=seeded,
+        json={
+            "course_ref": "tramuntana-full",
+            "event_date": _future(),
+            "start_time_local": "07:00",
+        },
+    ).json()
+    assert api.delete(f"/api/v1/races/{race['id']}", headers=seeded).status_code == 204
+    assert api_db.get(Race, UUID(race["id"])) is None
+
+
+@needs_bundle
+def test_nobody_sees_another_athletes_races(seeded, api: TestClient) -> None:
+    race = api.post(
+        "/api/v1/races",
+        headers=seeded,
+        json={
+            "course_ref": "tramuntana-full",
+            "event_date": _future(),
+            "start_time_local": "07:00",
+        },
+    ).json()
+    other = api.post(
+        "/api/v1/auth/signup",
+        json={
+            "email": "jonas.feldt@example.com",
+            "password": "correct-horse-battery",
+            "name": "Jonas Feldt",
+        },
+    ).json()
+    intruder = {"Authorization": f"Bearer {other['access_token']}"}
+
+    assert api.get("/api/v1/races", headers=intruder).json() == []
+    assert api.get(f"/api/v1/races/{race['id']}", headers=intruder).status_code == 404
+    assert api.delete(f"/api/v1/races/{race['id']}", headers=intruder).status_code == 404
+
+
+@pytest.mark.parametrize(
+    ("method", "path"),
+    [
+        ("POST", "/api/v1/races"),
+        ("GET", "/api/v1/races"),
+        ("GET", f"/api/v1/races/{UUID(int=0)}"),
+        ("DELETE", f"/api/v1/races/{UUID(int=0)}"),
+    ],
+)
+def test_every_race_endpoint_rejects_an_absent_token(
+    api: TestClient, method: str, path: str
+) -> None:
+    assert api.request(method, path, json={}).status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Route geometry for the map
+# ---------------------------------------------------------------------------
+
+
+@needs_bundle
+def test_recon_returns_real_route_coordinates(
+    full_access_api: TestClient, full_access_headers: dict, migrated_engine
+) -> None:
+    """An entitled athlete's map draws the actual course.
+
+    Run as a full-access account rather than by buying a plan, because what is
+    under test here is the geometry and its coordinate order — not the
+    entitlement, which has its own tests.
+    """
+    from sqlalchemy.orm import sessionmaker
+
+    with sessionmaker(bind=migrated_engine)() as session:
+        load_bundle_file(session, TRAMUNTANA)
+        session.commit()
+
+    body = full_access_api.get(
+        "/api/v1/courses/tramuntana-full/recon", headers=full_access_headers
+    ).json()
+    assert body["access"]["map_unlocked"] is True
+
+    for leg in body["legs"]:
+        coords = leg["coordinates"]
+        assert coords, f"{leg['leg']} has no coordinates"
+        assert len(coords) <= 601, "downsampled for the browser"
+        lng, lat, elev = coords[0]
+        # Mallorca: roughly 2-4 E, 39-40 N. Reversed pairs land in Somalia.
+        assert 2.0 < lng < 4.5, f"longitude {lng} is not first"
+        assert 39.0 < lat < 40.5, f"latitude {lat} out of range"
+        assert isinstance(elev, float)
+
+
+@needs_bundle
+def test_downsampling_keeps_the_finish(seeded, api: TestClient, api_db) -> None:
+    """A route that stops short of the finish looks like a data error."""
+    from raceos.services.course_service import _downsample, _leg_coordinates
+
+    bundle = api_db.scalar(select(CourseBundle))
+    course = api_db.scalar(select(Course))
+    assert course is not None
+    assert bundle is not None
+    leg = bundle.legs[0]
+    full = _leg_coordinates(leg)
+    reduced = _downsample(full, 50)
+
+    assert reduced[0] == full[0]
+    assert reduced[-1] == full[-1]
+    assert len(reduced) <= 51
+
+
+# ---------------------------------------------------------------------------
+# The live forecast
+# ---------------------------------------------------------------------------
+
+
+def _enter_race(api: TestClient, headers, *, days_away: int) -> str:
+    event_date = (datetime.now(UTC).date() + timedelta(days=days_away)).isoformat()
+    created = api.post(
+        "/api/v1/races",
+        headers=headers,
+        json={
+            "course_ref": "tramuntana-full",
+            "event_date": event_date,
+            "start_time_local": "07:00",
+        },
+    )
+    assert created.status_code in (200, 201), created.text
+    return str(created.json()["id"])
+
+
+@needs_bundle
+def test_a_race_further_out_than_the_horizon_says_so_rather_than_failing(
+    seeded, api: TestClient
+) -> None:
+    """Beyond the horizon a forecast is noise. Saying "come back later" is a
+    different screen from "the provider is down", so the reason is returned."""
+    race_id = _enter_race(api, seeded, days_away=120)
+
+    response = api.get(f"/api/v1/races/{race_id}/forecast", headers=seeded)
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["available"] is False
+    assert body["unavailable_reason"] == "beyond_horizon"
+    # The two numbers that let the UI say when to come back, rather than guess.
+    assert body["days_away"] == 120
+    assert body["horizon_hours"] > 0
+
+
+@needs_bundle
+def test_an_unreachable_provider_is_not_an_error_on_this_endpoint(seeded, api: TestClient) -> None:
+    """A forecast is an improvement to a plan, never a precondition for one.
+
+    The suite runs with no network, so this is the real outage path rather
+    than a simulated one.
+    """
+    race_id = _enter_race(api, seeded, days_away=3)
+
+    response = api.get(f"/api/v1/races/{race_id}/forecast", headers=seeded)
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["available"] is False
+    assert body["unavailable_reason"] == "provider_unavailable"
+    assert body["temp_c"] is None
+
+
+@needs_bundle
+def test_a_cached_forecast_is_served_with_the_hour_it_is_for(
+    seeded, api: TestClient, api_db, api_settings
+) -> None:
+    """The reading is for the race's **start hour**, not for now — a forecast
+    for 3 a.m. would be no use to an athlete starting at seven."""
+    from raceos.services import weather_service
+
+    race_id = _enter_race(api, seeded, days_away=2)
+    race = api_db.get(Race, UUID(race_id))
+    course = api_db.get(Course, race.course_id)
+
+    # Seed the cache the way a successful provider call would have.
+    from zoneinfo import ZoneInfo
+
+    start_utc = datetime.combine(
+        race.event_date, race.start_time_local, tzinfo=ZoneInfo(course.timezone)
+    ).astimezone(UTC)
+    weather_service.write_cache(
+        api_db,
+        weather_service._cache_key(
+            float(course.lat), float(course.lng), start_utc.date(), start_utc.hour
+        ),
+        {
+            "temp_c": 27.5,
+            "humidity": 71.0,
+            "wind_speed_ms": 4.2,
+            "wind_dir_deg": 210.0,
+            "conditions": "clear",
+            "water_temp_c": 22.0,
+            "pressure_hpa": 1013.0,
+            "cloud_cover_pct": 8.0,
+        },
+        api_settings,
+    )
+    api_db.commit()
+
+    body = api.get(f"/api/v1/races/{race_id}/forecast", headers=seeded).json()
+    assert body["available"] is True
+    assert body["temp_c"] == 27.5
+    assert body["conditions"] == "clear"
+    assert body["unavailable_reason"] is None
+    assert body["for_local_time"].endswith("07:00")
+
+
+@needs_bundle
+def test_nobody_reads_another_athletes_forecast(seeded, api: TestClient) -> None:
+    """It is keyed by race, and a race belongs to one athlete."""
+    race_id = _enter_race(api, seeded, days_away=30)
+
+    other = api.post(
+        "/api/v1/auth/signup",
+        json={"email": "stranger.forecast@example.com", "password": "correct-horse-battery-42"},
+    )
+    assert other.status_code in (200, 201), other.text
+    intruder = {"Authorization": f"Bearer {other.json()['access_token']}"}
+
+    assert api.get(f"/api/v1/races/{race_id}/forecast", headers=intruder).status_code == 404
+
+
+@needs_bundle
+def test_the_forecast_endpoint_rejects_an_absent_token(seeded, api: TestClient) -> None:
+    race_id = _enter_race(api, seeded, days_away=30)
+    assert api.get(f"/api/v1/races/{race_id}/forecast").status_code == 401

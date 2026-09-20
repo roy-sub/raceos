@@ -1,0 +1,466 @@
+:root{
+  --paper:#F1EEE8;
+  --paper-warm:#F6F4EF;
+  --card:#FBF8F2;
+  --ink:#15140F;
+  --ink-soft:#3D3A31;
+  --muted:#5C574B;
+  --muted-2:#6B6455;
+  --faint:#8C8578;
+  --faint-2:#A39B8A;
+  --hair:rgba(21,20,15,.12);
+  --accent:#E4622F;
+  --accent-dark:#C6461B;
+  --dotted:#EAE3D6;
+  --dark:#15140F;
+  --dark-2:#1C1916;
+  --good:#2E7D53;
+  --warn:#A9761A;
+  --bad:#C0432E;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:Switzer,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+a{ color:var(--ink); text-decoration:none; }
+a:hover{ color:var(--accent-dark); }
+button{ font-family:inherit; }
+::selection{ background:var(--accent); color:#fff; }
+
+.mono{ font-family:'JetBrains Mono',monospace; }
+
+/* Present to assistive technology, absent from the page.
+   `display:none` and `visibility:hidden` would hide it from screen readers
+   too, which is the opposite of what this is for. */
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0;
+}
+
+input[type=range]{ -webkit-appearance:none; appearance:none; background:transparent; }
+input[type=range]::-webkit-slider-runnable-track{ height:3px; border-radius:2px; background:rgba(21,20,15,.14); }
+input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; margin-top:-9px; border-radius:50%; background:#fff; border:1px solid rgba(21,20,15,.1); box-shadow:0 2px 10px rgba(21,20,15,.18), inset 0 0 0 5px var(--accent); cursor:grab; }
+input[type=range]:active::-webkit-slider-thumb{ cursor:grabbing; box-shadow:0 2px 14px rgba(228,98,47,.4), inset 0 0 0 5px var(--accent); }
+input[type=range]::-moz-range-track{ height:3px; border-radius:2px; background:rgba(21,20,15,.14); }
+input[type=range]::-moz-range-thumb{ width:20px; height:20px; border-radius:50%; background:#fff; border:1px solid rgba(21,20,15,.1); box-shadow:0 2px 10px rgba(21,20,15,.18), inset 0 0 0 5px var(--accent); cursor:grab; }
+
+#om-boot{ position:fixed; inset:0; z-index:900; background:#15140F; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px; animation:om-shutter 1.85s cubic-bezier(.7,0,.3,1) forwards; }
+#om-boot .gate{ width:99px; height:99px; overflow:hidden; }
+#om-boot .strip{ display:flex; width:2376px; animation:om-gait .58s steps(24) infinite; }
+#om-boot .meter{ width:110px; height:2px; background:rgba(251,248,242,.14); overflow:hidden; }
+#om-boot .meter span{ display:block; height:100%; background:#E4622F; animation:om-meter 1.6s cubic-bezier(.3,.8,.2,1) forwards; }
+
+@keyframes om-gait{ from{ transform:translateX(0); } to{ transform:translateX(-2376px); } }
+@keyframes om-meter{ from{ width:0; } to{ width:100%; } }
+@keyframes om-shutter{ 0%,88%{ opacity:1; visibility:visible; } 100%{ opacity:0; visibility:hidden; } }
+@keyframes omRunFrame{ 0%,12.5%{ opacity:1; } 12.51%,100%{ opacity:0; } }
+@keyframes omLoaderOut{ to{ opacity:0; visibility:hidden; } }
+@keyframes omLoaderBar{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+@keyframes ticker{ to{ transform:translateX(-50%); } }
+@keyframes breathe{ 0%,100%{ opacity:.5; } 50%{ opacity:1; } }
+.om-breathe{ animation:breathe 2.4s ease-in-out infinite; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@keyframes rise{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
+.om-rise{ animation:rise .5s cubic-bezier(.16,1,.3,1) both; }
+@keyframes draw{ from{ stroke-dashoffset:64; } to{ stroke-dashoffset:0; } }
+
+/* Loading skeletons. The gradient itself is SHIMMER in lib/systemStates.ts;
+   this only slides it, so the two stay one design decision in two places. */
+@keyframes raceos-shimmer{ from{ background-position:-420px 0; } to{ background-position:420px 0; } }
+@media (prefers-reduced-motion: reduce){
+  [style*="raceos-shimmer"]{ animation:none !important; }
+}
+
+[data-reveal="out"]{ opacity:0; transform:translateY(22px); }
+[data-reveal="in"]{ opacity:1; transform:none; transition:opacity 1s cubic-bezier(.16,1,.3,1), transform 1s cubic-bezier(.16,1,.3,1); }
+[data-lines="out"] span > span{ transform:translateY(106%); }
+[data-lines="in"] span > span{ transform:translateY(0); transition:transform 1.05s cubic-bezier(.16,1,.3,1); }
+[data-zoom="out"] > *{ transform:scale(1.08); }
+[data-zoom="in"] > *{ transform:scale(1); transition:transform 1.6s cubic-bezier(.16,1,.3,1); }
+
+/* Reusable hover treatments (the design prototype expressed these as inline style-hover attrs). */
+.btn-accent{ transition:background .2s ease, color .2s ease; }
+.btn-accent:hover{ background:var(--ink) !important; }
+.btn-accent-invert{ transition:background .2s ease, color .2s ease; }
+.btn-accent-invert:hover{ background:#FBF8F2 !important; color:var(--ink) !important; }
+.btn-outline-dark{ transition:background .2s ease, border-color .2s ease; }
+.btn-outline-dark:hover{ background:rgba(255,255,255,.1) !important; border-color:rgba(255,255,255,.5) !important; }
+.btn-ghost{ transition:background .2s ease, color .2s ease; }
+.btn-ghost:hover{ background:var(--ink) !important; color:#FBF8F2 !important; }
+.row-hover:hover{ background:#F7F4ED !important; }
+.social-icon{ transition:background .2s ease, color .2s ease; }
+.social-icon:hover{ background:var(--ink) !important; color:#FBF8F2 !important; }
+.link-accent{ transition:color .2s ease; }
+.link-accent:hover{ color:var(--accent-dark) !important; }
+.btn-dark-to-accent{ transition:background .2s ease, color .2s ease; }
+.btn-dark-to-accent:hover{ background:var(--accent) !important; color:#fff !important; }
+.btn-outline-fade{ transition:background .2s ease; }
+.btn-outline-fade:hover{ background:rgba(255,255,255,.1) !important; }
+.row-hover-cream:hover{ background:#F4F1E9 !important; }
+.btn-outline-dark2{ transition:border-color .2s ease, background .2s ease; }
+.btn-outline-dark2:hover{ border-color:var(--ink) !important; background:rgba(21,20,15,.04) !important; }
+.row-hover-faint:hover{ background:rgba(21,20,15,.03) !important; }
+.row-hover-border:hover{ border-color:rgba(21,20,15,.28) !important; }
+.btn-drift-apply{ transition:background .2s ease; }
+.btn-drift-apply:hover{ background:#E0A33C !important; }
+.why-btn{ transition:border-color .2s ease, color .2s ease; }
+.why-btn:hover{ border-color:var(--accent) !important; color:var(--accent) !important; }
+.row-hover-tint:hover{ background:rgba(21,20,15,.025) !important; }
+.result-row:hover{ background:rgba(228,98,47,.06) !important; }
+.upload-dash{ transition:border-color .2s ease, background .2s ease; }
+.upload-dash:hover{ border-color:var(--accent) !important; background:rgba(228,98,47,.04) !important; }
+.qty-btn:hover{ background:rgba(21,20,15,.06) !important; }
+.remove-btn:hover{ background:rgba(192,57,43,.1) !important; }
+.pay-btn:hover{ opacity:.9; }
+.next-step-card{ transition:box-shadow .2s ease; }
+.next-step-card:hover{ box-shadow:0 1px 2px rgba(21,20,15,.06), 0 18px 40px -22px rgba(21,20,15,.3) !important; }
+.opacity-btn{ transition:opacity .2s ease; }
+.opacity-btn:hover{ opacity:.88; }
+.seg-btn{ transition:border-color .2s ease; }
+.seg-btn:hover{ border-color:rgba(21,20,15,.3) !important; }
+.btn-danger{ transition:background .2s ease; }
+.btn-danger:hover{ background:rgba(192,57,43,.1) !important; }
+
+@media (prefers-reduced-motion: reduce){
+  #om-boot{ display:none; }
+  [data-loader]{ display:none !important; }
+  *{ animation:none !important; transition:none !important; }
+  [data-reveal],[data-lines] span > span,[data-zoom] > *{ opacity:1 !important; transform:none !important; }
+}
+
+/* ---------------------------------------------------------------------------
+   Open-water drift.
+
+   The swim card has no elevation to draw, so it draws water. Each wave layer
+   is sampled across twice its box and slid by exactly half, which loops without
+   a seam; three layers at different speeds give the parallax of open water for
+   the cost of one transform each. The global reduced-motion rule above already
+   stops these, so there is no separate opt-out here.
+   --------------------------------------------------------------------------- */
+@keyframes raceos-drift{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+@keyframes raceos-drift-slow{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+@keyframes raceos-drift-fast{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+/* ---------------------------------------------------------------------------
+   The long-name marquee.
+
+   Only applied when a title actually overflows its container — see `Marquee`
+   in components/Marquee.tsx. The track holds two copies of the text, so
+   translating by half its width returns to the starting frame exactly.
+   --------------------------------------------------------------------------- */
+@keyframes raceos-marquee{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+.marquee-track{ display:inline-flex; white-space:nowrap; will-change:transform; }
+/* Only the running state gets a fade. A title that fits must not be dimmed at
+   its own last letter for no reason. */
+.marquee-mask:has(.marquee-track[data-run="true"]){
+  -webkit-mask-image:linear-gradient(to right,#000 0,#000 88%,transparent 100%);
+          mask-image:linear-gradient(to right,#000 0,#000 88%,transparent 100%);
+}
+.marquee-track[data-run="true"]{ animation:raceos-marquee var(--marquee-duration,26s) linear infinite; }
+.marquee-mask:hover .marquee-track[data-run="true"]{ animation-play-state:paused; }
+
+/* ---------------------------------------------------------------------------
+   The sign-in screen, on a phone.
+
+   The app is a fixed-width desktop layout by design — `minWidth: 1320` on every
+   page — and for the marketing and planning screens that is a deliberate
+   choice. For *auth* it was not a choice, it was a lockout: the screen is a
+   two-column grid with the photograph on the left and the form on the right, so
+   at 390px a visitor got a full screen of photograph with the form parked
+   off-canvas to the right, and no indication it was there. You could not sign
+   in to this product on a phone.
+
+   One breakpoint fixes it, and only for this screen: drop the decorative column
+   and let the form have the width. Everything else about the page is unchanged.
+   --------------------------------------------------------------------------- */
+@media (max-width: 860px){
+  .auth-shell{ min-width:0 !important; grid-template-columns:minmax(0,1fr) !important; }
+  .auth-art{ display:none !important; }
+  .auth-form{ padding:32px 22px 48px !important; }
+  .auth-form > div{ max-width:none !important; }
+}
+
+/* ---------------------------------------------------------------------------
+   Print — the same artefact as the PDF download.
+   ---------------------------------------------------------------------------
+   An athlete who presses Ctrl-P instead of finding the download button must
+   end up with the same document, not a screenshot of a web page. The rules
+   below mirror `raceos/exports/pdf.py`: A5, the same margins, the same type
+   scale in points, the same tokens.
+
+   **Monochrome legibility is the hard requirement.** Most of these are printed
+   on whatever machine is in the house, and a plan whose feasibility state is
+   carried by colour alone becomes unreadable in grey. Every state already
+   carries a glyph in the PDF; here the colours are kept but never asked to
+   work alone, and the accent is the only one that survives, because it is
+   decoration rather than meaning.
+*/
+@media print {
+  @page {
+    size: A5;
+    margin: 9mm 9mm 13mm 9mm;
+  }
+
+  :root { --accent: #E4622F; }
+
+  html, body {
+    background: #FBF8F2 !important;
+    color: #1C1917 !important;
+    font-size: 9.5pt !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+    /* Backgrounds and rules are structure here, not decoration: without them
+       the splits ladder loses the lines that separate one leg from the next. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Anything that is navigation, chrome or an action cannot be pressed on
+     paper, so it is not printed. Marked at the element rather than guessed
+     from the tag, so a new header does not silently start appearing. */
+  header, nav, footer,
+  button, [role="button"], input, select, textarea,
+  .no-print, [data-print="hide"],
+  /* The boot shutter is a fixed, full-bleed dark panel that fades out on its
+     own. Printing is not animated, so without this it lands on the paper as a
+     solid black A5 sheet and nothing else. Found by printing the page rather
+     than by reading the stylesheet. */
+  #om-boot {
+    display: none !important;
+  }
+
+  /* The page frame: the screen's centred column and its side gutters are a
+     browser-window idea and waste a third of an A5 sheet. */
+  main, .om-rise, [data-print="sheet"] {
+    max-width: none !important;
+    min-width: 0 !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* The PDF's type scale, in the PDF's units. */
+  h1 { font-size: 15pt !important; letter-spacing: -0.2pt !important; margin: 0 0 1mm !important; }
+  h2 {
+    font-size: 8pt !important; text-transform: uppercase; letter-spacing: 0.8pt !important;
+    color: #6B6459 !important; margin: 4mm 0 1.5mm !important;
+    border-bottom: 0.4pt solid rgba(28,25,23,.18); padding-bottom: 0.8mm;
+  }
+  h3, h4 { font-size: 9.5pt !important; margin: 2mm 0 1mm !important; }
+
+  table { width: 100% !important; border-collapse: collapse !important; }
+  th {
+    text-align: left; font-size: 8pt !important; text-transform: uppercase;
+    letter-spacing: 0.5pt !important; color: #6B6459 !important; font-weight: 600;
+    padding: 0.6mm 1.5mm 0.6mm 0 !important;
+  }
+  td {
+    padding: 0.9mm 1.5mm 0.9mm 0 !important; font-size: 9.5pt !important;
+    border-top: 0.3pt solid rgba(28,25,23,.18) !important; vertical-align: top;
+  }
+  /* Times and watts line up in columns or they cannot be compared at a glance,
+     which is the only reason to print a splits table at all. */
+  .mono, .num, td.num {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* A row of numbers split across a page break is a row you cannot read. */
+  tr, li, .card, [data-print="keep"] { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+
+  /* Cards become plain blocks: a drop shadow is a screen affordance and prints
+     as a grey smear. */
+  [style*="box-shadow"] { box-shadow: none !important; }
+
+  /* Charts are the one thing that genuinely cannot be reproduced in
+     monochrome, and every chart on this site already has a table equivalent
+     beside it. Print the table. */
+  svg.chart, canvas, [data-print="chart"] { display: none !important; }
+  [data-print="chart-table"] { display: block !important; }
+
+  /* Links: a bare underline on paper points nowhere. The href is only worth
+     printing when it leaves the site. */
+  a { color: inherit !important; text-decoration: none !important; }
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 7.5pt;
+    color: #6B6459;
+  }
+
+  /* Deliberately NOT `animation: none`.
+     Print captures one static frame, so nothing animates on paper anyway — but
+     killing animations *resets* any element an animation had faded out, and
+     this app dismisses its boot and route-transition overlays exactly that
+     way. The rule resurrected a full-bleed panel at opacity 1 and printed it
+     over the plan. Found by printing the page; kept as a comment so it is not
+     helpfully re-added. */
+
+  /* Overlays that dismiss themselves by ending an animation at opacity 0.
+     Hidden explicitly, which is robust whether or not the animation has run. */
+  #om-boot, .om-transition, [data-overlay] {
+    display: none !important;
+  }
+
+  /* Actions rendered as links rather than buttons — "Race card", "Export",
+     "My plans". A button element is caught by the rule above; these are not,
+     and an action you cannot press is not worth the ink. */
+  .btn-accent, .btn-dark-to-accent, [class*="btn-"] {
+    display: none !important;
+  }
+
+  /* Tab strips: on paper there is only the panel that was open, and a row of
+     tabs you cannot click just tells the reader what they are missing. */
+  [role="tablist"], .tab-strip, [data-print="tabs"] {
+    display: none !important;
+  }
+
+  /* The breadcrumb is a way back, and paper has no back. */
+  [aria-label="Breadcrumb"] { display: none !important; }
+}
+
+/* ---------------------------------------------------------------------------
+   Focus, and the way in.
+   ---------------------------------------------------------------------------
+   There were no focus styles at all. Chrome's default ring is suppressed by
+   most of the custom backgrounds here, so a keyboard user could tab through
+   the app with no idea where they were — which makes every other keyboard fix
+   pointless.
+
+   `:focus-visible` rather than `:focus`, so a mouse click does not leave a
+   ring behind, and a two-tone outline so it stays visible on both the light
+   paper and the dark panels. */
+:focus-visible {
+  outline: 2px solid #15140F;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.btn-accent:focus-visible,
+[style*="background: #E4622F"]:focus-visible,
+[style*="background:#E4622F"]:focus-visible {
+  outline-color: #15140F;
+  box-shadow: 0 0 0 4px rgba(251, 248, 242, .9);
+}
+
+/* Skip link: the first thing in the tab order, invisible until focused. Every
+   page here opens with a header and a nav, and without this a keyboard or
+   screen-reader user re-reads them on every navigation before reaching the
+   plan. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 1000;
+}
+.skip-link:focus {
+  left: 8px;
+  top: 8px;
+  width: auto;
+  height: auto;
+  padding: 10px 16px;
+  background: #15140F;
+  color: #FBF8F2;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* A target for it, and a landmark for assistive technology. */
+main:focus { outline: none; }
+
+/* ---------------------------------------------------------------------------
+   Race-day display mode.
+   ---------------------------------------------------------------------------
+   One attribute scales the whole screen, rather than every component growing
+   its own idea of "large". The plan is read with wet hands, in daylight, at
+   heart rate, on a phone strapped to a bar — the default type is a desk size.
+
+   Targets go to 44px, which is the WCAG 2.5.5 figure and also just what a
+   thumb needs when the rest of you is busy. */
+[data-race-display="large"] {
+  font-size: 125%;
+}
+[data-race-display="large"] button,
+[data-race-display="large"] a,
+[data-race-display="large"] [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+[data-race-display="large"] .mono {
+  letter-spacing: .1em;
+}
+
+/* ---------------------------------------------------------------------------
+   The dark end of the page.
+   ---------------------------------------------------------------------------
+   Two rules that belong together: one makes a large near-black area look like
+   a material, the other makes a photograph end in that material instead of
+   stopping at a line.
+
+   `.ink-grain` is a tiled SVG noise field, desaturated inside the filter so
+   the browser never has to run a CSS filter over it. Laid over the footer at a
+   few percent it does something a flat fill cannot: it breaks up the stepped
+   banding an 8-bit gradient shows on a wide monitor, and it gives the ink the
+   tooth of paper. You should not be able to see it unless you go looking. */
+.ink-grain {
+  /* This is not noise laid *over* the ink — it is the ink, with grain in it.
+
+     Everything about the way it is written comes from sampling pixels across
+     the join rather than from looking at it. Noise composited over a near-black
+     field lifts that field several levels however it is blended: painted
+     normally it averages mid-grey, and `overlay` is worse, not better, because
+     on a base this dark its two halves have wildly different slopes (0.16 below
+     mid-grey, 1.84 above) so the bright half of the noise dominates. Three
+     levels is nothing to look at and everything to see — it is exactly the step
+     that reads as a line where a grained footer meets the ungrained photograph
+     fading into it.
+
+     So the noise is mapped, in the filter, to a narrow band centred on
+     #15140F itself: slope .1 with per-channel intercepts that put the mean back
+     on 21/20/15. Opaque, normally blended, no blend mode. The field's mean is
+     the ink exactly, and only the variation lands — enough to break the
+     stepped banding an 8-bit gradient shows across a wide monitor, and to give
+     the ink the tooth of paper instead of the deadness of a switched-off
+     screen. `color-interpolation-filters: sRGB` because the default is linear
+     and would move every one of those numbers. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='.1' intercept='.032'/%3E%3CfeFuncG type='linear' slope='.1' intercept='.028'/%3E%3CfeFuncB type='linear' slope='.1' intercept='.009'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+/* `.fade-to-ink` goes at the bottom of a full-bleed photographic section that
+   sits directly above the footer. The photograph does not stop — it resolves:
+   by its last pixel it is already the footer's own #15140F, so the two read as
+   one continuous dark mass rather than two images stacked on each other.
+
+   220px because the eye finds a short fade: it reads as a gradient laid on a
+   photograph. Over this distance there is nothing to find, only a page getting
+   darker as it ends. */
+.fade-to-ink {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 260px;
+  pointer-events: none;
+  /* Full ink is reached at 90%, not at 100%, and then held. Without that last
+     held strip the darkest pixel in the whole transition falls exactly on the
+     join — the photograph is still showing through a hair above it and the
+     footer's own warmth is already rising a hair below — and a trough five
+     levels deep is enough to read as a line. Measured, not guessed. */
+  background: linear-gradient(
+    to bottom,
+    rgba(21, 20, 15, 0) 0%,
+    rgba(21, 20, 15, .38) 46%,
+    rgba(21, 20, 15, .8) 74%,
+    #15140F 90%,
+    #15140F 100%
+  );
+}
