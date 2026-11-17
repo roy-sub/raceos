@@ -50,33 +50,32 @@ Copy-paste field values, upload order and platform notes. The full article is in
 
 **Skills (5):** `AI Development` · `Full-Stack Development` · `SaaS Development` · `Python` · `Next.js`
 
-**Cover image:** `media/00_cover/raceos-cover_upwork_1000x750.png`
-**Gallery order:** 03b live solver → 04b AI guardrail → 05a architecture → 07a KPIs → 03a 3D map → 08b mobile → 06a pricing
+**Cover image:** `media/RaceOS_03_Hero.png` (16:10 at 2880 px wide; Upwork crops it to 4:3 cleanly, since the headline sits left of centre)
+**Gallery order:** Hero → Live Solver → Five Bags → Race Directory (Upwork portfolio items are image-first; link the two films from YouTube/Loom if you want them there)
 
 ---
 
-## 3 · Recommended media order on Contra
+## 3 · The six Contra media assets (2 videos + 4 images)
 
-| # | File | Why here |
-|---|---|---|
-| 1 | `00_cover/raceos-cover_contra_1600x1200.png` | Thumbnail on profile and Discover |
-| 2 | `09_video/09a_live-solver-demo.mp4` | Shows the product working; strongest hook |
-| 3 | `02_problem/02b_before-after-diagram.png` | The problem in 3 seconds |
-| 4 | `03_product/03a_course-map-3d.jpg` + `09b` video | Visual wow factor |
-| 5 | `03_product/03c_five-bags.jpg` | Unique feature |
-| 6 | `04_ai/04b_ai-guardrail-diagram.png` | Your AI-engineering differentiator |
-| 7 | `05_architecture/05a_system-architecture.png` | Technical credibility |
-| 8 | `07_kpis/07a_kpi-build-scope.png` | Scope at a glance |
-| 9 | `08_design/08b_mobile-showcase.jpg` | Design range |
-| 10 | `10_role/10a_capabilities.png` | Positions you across every discipline |
-| 11 | `11_cta/11_cta-work-with-me.png` | Closes with a call to action |
+All six are in `media/`. Every one is desktop-sized and was captured from the live product at raceosapp.com.
+
+| # | File | What it is | Placement |
+|---|---|---|---|
+| 1 | `RaceOS_01_Launch-Film.mp4` | 29 s launch film, 1920×1080, 30 fps. Animated logo reveal, the "Race week, solved." headline over cinematic footage, feature beat, live-solver and five-bags UI, stat count-up, end card | **First media block**: leads the project |
+| 2 | `RaceOS_02_3D-Terrain-Map.mp4` | ~21 s, 1920×1080, 30 fps. The interactive Three.js terrain: auto-rotation, drag, live elevation/grade readout, swim → bike → run leg isolation | Under Feature 1 |
+| 3 | `RaceOS_03_Hero.png` | Landing hero, 2880×1800 | **Project cover / thumbnail** |
+| 4 | `RaceOS_04_Live-Solver.png` | "Certainty first. Speed second." solver section, 2880×1800 | Under Feature 2 |
+| 5 | `RaceOS_05_Five-Bags.png` | "Five bags. No guessing." section, 2880×1800 | Under Feature 3 |
+| 6 | `RaceOS_06_Race-Directory.png` | "The season, and every cut-off in it." directory, 2880×1800 | Under Feature 8 |
+
+The films are silent by design: Contra autoplays muted. Add a licensed music bed in any editor if you want sound.
 
 ---
 
 ## 4 · Platform notes
 
-- **Tables:** Contra's and Upwork's editors may not keep Markdown tables when pasted. Every key table has an image twin: KPIs → `07a`/`07b`, stack → `10b`, roles → `10a`, pipeline → `05b`. Use the image, or turn the table into a bullet list.
-- **Video:** Upload the MP4s directly, or put them on YouTube/Loom and paste the link (Contra embeds both). GIFs are included as lighter fallbacks.
+- **Tables:** Contra's and Upwork's editors may not keep Markdown tables when pasted. Convert any table that drops into a short bullet list. The "Project at a Glance" and "By the Numbers" tables work well as bullets.
+- **Video:** Upload the MP4s directly, or host them on YouTube/Loom and paste the link (Contra embeds both).
 - **Personal site:** The article is plain Markdown and renders as-is on GitHub, Notion, Medium or your own site.
 - **Accuracy:** "Build scope" figures come straight from the repository. "Product indicators" are stated on the live site. The "Illustrative unit economics" table is labelled as hypothetical; keep that label, or replace it with your real numbers.
 - **Placeholders to fill:** Search the article for `[ADD` and `[OPTIONAL`.
@@ -90,5 +89,5 @@ Copy-paste field values, upload order and platform notes. The full article is in
 | Hire an AI engineer | AI Engineer, AI Developer, LLM integration, AI guardrails, AI agents & automations |
 | Hire a SaaS builder | SaaS Developer, AI SaaS development, custom SaaS development, SaaS MVP |
 | Hire a full-stack developer | Full-Stack Developer, Next.js, React, TypeScript, Python, FastAPI, PostgreSQL |
-| Hire a web designer | UI/UX Designer, Web Designer, design system, responsive design |
+| Hire a web designer | UI/UX Designer, Web Designer, design system, interface design |
 | AI search engines (GEO) | "Project at a Glance" fact table and the FAQ, both written as short, quotable statements |
