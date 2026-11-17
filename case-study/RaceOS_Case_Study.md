@@ -1,10 +1,10 @@
 <!--
   RaceOS — Portfolio Case Study (Contra / Upwork / personal site)
-  Six media assets (2 videos + 4 images) live in /media. Each 📍 line marks exactly
+  Eight media assets (2 videos + 6 images) live in /media. Each 📍 line marks exactly
   where one goes; the Markdown link beneath it previews the file. Delete 📍 lines once uploaded.
 -->
 
-📍 **MEDIA 3 / 6 · COVER IMAGE** · `media/RaceOS_03_Hero.png` · Set as the **project cover / thumbnail**.
+📍 **MEDIA 3 / 8 · COVER IMAGE** · `media/RaceOS_03_Hero.png` · Set as the **project cover / thumbnail**.
 ![RaceOS: Race week, solved.](media/RaceOS_03_Hero.png)
 
 # RaceOS: An AI-Native SaaS for Ironman Race Planning, Designed, Engineered & Shipped Solo
@@ -13,7 +13,7 @@
 
 **🔗 Live product:** [raceosapp.com](https://raceosapp.com/) · **💻 Source:** [github.com/roy-sub/raceos](https://github.com/roy-sub/raceos) · **🧑‍💻 Role:** Founder-engineer: product, design, AI, full-stack, DevOps
 
-📍 **MEDIA 1 / 6 · VIDEO** · `media/RaceOS_01_Launch-Film.mp4` · 29-second launch film. Place first so it leads the project.
+📍 **MEDIA 1 / 8 · VIDEO** · `media/RaceOS_01_Launch-Film.mp4` · 29-second launch film. Place first so it leads the project.
 
 ---
 
@@ -57,22 +57,28 @@ RaceOS treats race execution as **one dependent planning problem**, not four sep
 ### 1 · Interactive 3D Course Recon
 Athletes explore their course **before they ride it**: a rotatable 3D terrain model with every aid station, cut-off and metre of climbing, plus a live readout that follows the cursor.
 
-📍 **MEDIA 2 / 6 · VIDEO** · `media/RaceOS_02_3D-Terrain-Map.mp4` · The 3D terrain in motion: rotation, cursor readout, leg switching.
+📍 **MEDIA 2 / 8 · VIDEO** · `media/RaceOS_02_3D-Terrain-Map.mp4` · The 3D terrain in motion: rotation, cursor readout, leg switching.
 
 ### 2 · The Live Solver
 Move the goal time and **every dependent number re-derives instantly**: splits, cut-off margins, carbs per hour, fluid, gels and bag contents.
 
-📍 **MEDIA 4 / 6 · IMAGE** · `media/RaceOS_04_Live-Solver.png` · The live solver.
+📍 **MEDIA 4 / 8 · IMAGE** · `media/RaceOS_04_Live-Solver.png` · The live solver.
 ![Live solver: move the goal, every number follows](media/RaceOS_04_Live-Solver.png)
 
 ### 3 · Five Bags, No Guessing
 Morning, T1, T2, Bike Special Needs, Run Special Needs, packed item by item. **Every item carries the reason it's there**, so athletes can disagree on Tuesday instead of at the aid station.
 
-📍 **MEDIA 5 / 6 · IMAGE** · `media/RaceOS_05_Five-Bags.png` · Five bags, each item with its reason.
+📍 **MEDIA 5 / 8 · IMAGE** · `media/RaceOS_05_Five-Bags.png` · Five bags, each item with its reason.
 ![Five bags. No guessing.](media/RaceOS_05_Five-Bags.png)
 
 ### 4 · Cut-Off Calculator & Course Intelligence (free funnel)
 Per-leg elevation profiles parsed from GPX, every aid station with its supplies, and a **free, no-account cut-off calculator**. It's the product's top-of-funnel acquisition hook.
+
+📍 **MEDIA 7 / 8 · IMAGE** · `media/RaceOS_07_Elevation-Profiles.png` · Per-leg elevation profiles.
+![Where the course takes it out of you: swim, bike and run elevation profiles](media/RaceOS_07_Elevation-Profiles.png)
+
+📍 **MEDIA 8 / 8 · IMAGE** · `media/RaceOS_08_Cutoff-Calculator.png` · The free cut-off calculator.
+![Where do your margins sit? The free cut-off calculator](media/RaceOS_08_Cutoff-Calculator.png)
 
 ### 5 · Drift Detection: Nothing Changes Silently
 When the race-week forecast moves, RaceOS **re-solves a shadow copy** and shows the athlete exactly what *would* change and what it costs. Their plan stays untouched until they approve.
@@ -86,7 +92,7 @@ A coach seat manages **up to 15 athletes** with a race-week board, side-by-side 
 ### 8 · SEO-Ready Race Directory
 A searchable, filterable directory with a statically generated, **structured-data-rich page per race**, so organic search becomes a growth channel from day one.
 
-📍 **MEDIA 6 / 6 · IMAGE** · `media/RaceOS_06_Race-Directory.png` · The race directory.
+📍 **MEDIA 6 / 8 · IMAGE** · `media/RaceOS_06_Race-Directory.png` · The race directory.
 ![The season, and every cut-off in it](media/RaceOS_06_Race-Directory.png)
 
 ---

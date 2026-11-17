@@ -51,13 +51,13 @@ Copy-paste field values, upload order and platform notes. The full article is in
 **Skills (5):** `AI Development` · `Full-Stack Development` · `SaaS Development` · `Python` · `Next.js`
 
 **Cover image:** `media/RaceOS_03_Hero.png` (16:10 at 2880 px wide; Upwork crops it to 4:3 cleanly, since the headline sits left of centre)
-**Gallery order:** Hero → Live Solver → Five Bags → Race Directory (Upwork portfolio items are image-first; link the two films from YouTube/Loom if you want them there)
+**Gallery order:** Hero → Live Solver → Five Bags → Cut-off Calculator → Elevation Profiles → Race Directory (Upwork portfolio items are image-first; link the two films from YouTube/Loom if you want them there)
 
 ---
 
-## 3 · The six Contra media assets (2 videos + 4 images)
+## 3 · The Contra media assets (2 videos + 6 images)
 
-All six are in `media/`. Every one is desktop-sized and was captured from the live product at raceosapp.com.
+All eight are in `media/`. Every one is desktop-sized and was captured from the live product at raceosapp.com.
 
 | # | File | What it is | Placement |
 |---|---|---|---|
@@ -67,6 +67,10 @@ All six are in `media/`. Every one is desktop-sized and was captured from the li
 | 4 | `RaceOS_04_Live-Solver.png` | "Certainty first. Speed second." solver section, 2880×1800 | Under Feature 2 |
 | 5 | `RaceOS_05_Five-Bags.png` | "Five bags. No guessing." section, 2880×1800 | Under Feature 3 |
 | 6 | `RaceOS_06_Race-Directory.png` | "The season, and every cut-off in it." directory, 2880×1800 | Under Feature 8 |
+| 7 | `RaceOS_07_Elevation-Profiles.png` | "Where the course takes it out of you." Swim, bike and run profiles, 2880×1800 | Under Feature 4 |
+| 8 | `RaceOS_08_Cutoff-Calculator.png` | "Where do your margins sit?" Free cut-off calculator, 2880×1800 | Under Feature 4 |
+
+**If Contra caps you at four images:** keep 03 Hero (cover), 04 Live Solver and 05 Five Bags, then choose one of 06 / 07 / 08 for the fourth slot. 08 Cut-off Calculator is the strongest choice: it is the free acquisition tool and reads instantly. Delete the unused 📍 placeholders from the article.
 
 The films are silent by design: Contra autoplays muted. Add a licensed music bed in any editor if you want sound.
 
