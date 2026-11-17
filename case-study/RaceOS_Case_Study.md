@@ -4,7 +4,9 @@
   where one goes; the Markdown link beneath it previews the file. Delete 📍 lines once uploaded.
 -->
 
-📍 **MEDIA 3 / 8 · COVER IMAGE** · `media/RaceOS_03_Hero.png` · Set as the **project cover / thumbnail**.
+📍 **THUMBNAIL** · `media/RaceOS_00_Thumbnail_4x3.mp4` · Contra project thumbnail (4:3 video).
+
+📍 **MEDIA 3 / 8 · COVER IMAGE** · `media/RaceOS_03_Hero.png` · Hero image; use it as a static cover wherever video thumbnails aren't supported.
 ![RaceOS: Race week, solved.](media/RaceOS_03_Hero.png)
 
 # RaceOS: An AI-Native SaaS for Ironman Race Planning, Designed, Engineered & Shipped Solo

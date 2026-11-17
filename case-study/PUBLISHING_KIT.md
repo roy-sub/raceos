@@ -61,6 +61,7 @@ All eight are in `media/`. Every one is desktop-sized and was captured from the 
 
 | # | File | What it is | Placement |
 |---|---|---|---|
+| 0 | `RaceOS_00_Thumbnail_4x3.mp4` | 4.8 s opening of the launch film, converted to 4:3 (1920×1440). The full 16:9 frame is untouched; the canvas is extended top and bottom with a mirrored, blurred continuation of the shot | **Contra thumbnail (4:3)** |
 | 1 | `RaceOS_01_Launch-Film.mp4` | 29 s launch film, 1920×1080, 30 fps. Animated logo reveal, the "Race week, solved." headline over cinematic footage, feature beat, live-solver and five-bags UI, stat count-up, end card | **First media block**: leads the project |
 | 2 | `RaceOS_02_3D-Terrain-Map.mp4` | ~21 s, 1920×1080, 30 fps. The interactive Three.js terrain: auto-rotation, drag, live elevation/grade readout, swim → bike → run leg isolation | Under Feature 1 |
 | 3 | `RaceOS_03_Hero.png` | Landing hero, 2880×1800 | **Project cover / thumbnail** |
